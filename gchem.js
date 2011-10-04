@@ -57,7 +57,7 @@ function onOpen() {
                   {name: "getXLogP", functionName: "InsertgetXLogP"}];
   ss.addMenu("gCDK", cdkmenu);
   
-  var cdkmenu = [ {name: "getCSID", functionName: "InsertgetCSID"},
+  var onsmenu = [ {name: "getCSID", functionName: "InsertgetCSID"},
                   {name: "getCSImage", functionName: "InsertgetCSImage"},
                   {name: "getCSPredictedDensity", functionName: "InsertgetCSPredictedDensity"},
                   {name: "getPredictedMP", functionName: "InsertgetPredictedMP"},
@@ -65,8 +65,14 @@ function onOpen() {
                   {name: "getMC", functionName: "Insertgetmc"},
                   {name: "getX2M", functionName: "InsertgetX2M"},
                   {name: "getMassRatio2M", functionName: "InsertgetMassRatio2M"},
-                  {name: "getMassFraction2M", functionName: "InsertgetMassFraction2M"}];
-  ss.addMenu("gONS", cdkmenu);
+                  {name: "getMassFraction2M", functionName: "InsertgetMassFraction2M"},
+                  {name: "getInCRC", functionName: "InsertgetInCRC"},
+                  {name: "getPeakHeight", functionName: "InsertgetPeakHeight"}];
+  ss.addMenu("gONS", onsmenu);
+  
+  var gDrexel = [ {name: "DOI2Title", functionName: "InsertDOI2Title"},
+                  {name: "DOI2Access", functionName: "InsertDOI2Access"}];
+  ss.addMenu("gDrexel", gDrexel);
 }
 
 function InsertgetImage() {
@@ -301,6 +307,42 @@ function InsertgetMassFraction2M() {
  sheet.getRange(r, c).setFormula('=getMassFraction2M(' + sheet.getRange(r, 1).getA1Notation() + ',' + sheet.getRange(r, 2).getA1Notation() + ',' + sheet.getRange(r, 3).getA1Notation()+ ')');
 }
 
+function InsertgetInCRC() {
+ var sheet = SpreadsheetApp.getActiveSheet();
+ var ac = sheet.getActiveCell();
+ var r = ac.getRow();
+ var c = ac.getColumn();
+ sheet.getRange(r, c).setFormula('=getInCRC(' + sheet.getRange(r, 1).getA1Notation() + ')');
+}
+
+function InsertgetPeakHeight() {
+ var sheet = SpreadsheetApp.getActiveSheet();
+ var ac = sheet.getActiveCell();
+ var r = ac.getRow();
+ var c = ac.getColumn();
+ sheet.getRange(r, c).setFormula('=getPeakHeight(' + sheet.getRange(r, 1).getA1Notation() + ',' + sheet.getRange(r, 2).getA1Notation() + ',' + sheet.getRange(r, 3).getA1Notation() + ')');
+}
+
+/**
+ * gDrexel
+ */
+
+function InsertDOI2Title() {
+ var sheet = SpreadsheetApp.getActiveSheet();
+ var ac = sheet.getActiveCell();
+ var r = ac.getRow();
+ var c = ac.getColumn();
+ sheet.getRange(r, c).setFormula('=DOI2Title(' + sheet.getRange(r, 1).getA1Notation() + ')');
+}
+
+function InsertDOI2Access() {
+ var sheet = SpreadsheetApp.getActiveSheet();
+ var ac = sheet.getActiveCell();
+ var r = ac.getRow();
+ var c = ac.getColumn();
+ sheet.getRange(r, c).setFormula('=DOI2Access(' + sheet.getRange(r, 1).getA1Notation() + ')');
+}
+
 /**
  * All Functions
  */
@@ -488,7 +530,7 @@ function getSynonyms(id) {
 };
 
 function lookup(id, representation) {
-  var url = 'http://cactus.nci.nih.gov/chemical/structure/' + id + '/' + representation;
+  var url = 'http://cactus.nci.nih.gov/chemical/structure/' + encodeURIComponent(id) + '/' + representation;
   var result;
   
   try {
@@ -916,5 +958,53 @@ function getMassFraction2M(solute,solvent,x) {
     // do nothing
   }
   
+  return result;
+}
+
+function getInCRC(id) {
+  var url = 'http://showme.physics.drexel.edu/onsc/Services/getInCRC/index.php?cas=' + encodeURIComponent(id);
+  var result;
+  try {
+    var response = UrlFetchApp.fetch(url);
+    result = response.getContentText();
+  } catch (error) {
+    // do nothing
+  }
+  return result;
+}
+
+function getPeakHeight(spec,min,max) {
+  var url = 'http://lxsrv7.oru.edu/~alang/solubility/SpecPeakXY.php?url=' + encodeURIComponent(spec) +  '&l=' + min + '&u=' + max;
+  var result;
+  try {
+    var response = UrlFetchApp.fetch(url);
+    result = response.getContentText();
+  } catch (error) {
+    // do nothing
+  }
+  return result;
+}
+
+function DOI2Title(id) {
+  var url = 'http://showme.physics.drexel.edu/onsc/Services/DrexelSearch/DOI2Title.php?doi=' + encodeURIComponent(id);
+  var result;
+  try {
+    var response = UrlFetchApp.fetch(url);
+    result = response.getContentText();
+  } catch (error) {
+    // do nothing
+  }
+  return result;
+}
+
+function DOI2Access(id) {
+  var url = 'http://showme.physics.drexel.edu/onsc/Services/DrexelSearch/DOI2Access.php?doi=' + encodeURIComponent(id);
+  var result;
+  try {
+    var response = UrlFetchApp.fetch(url);
+    result = response.getContentText();
+  } catch (error) {
+    // do nothing
+  }
   return result;
 }
